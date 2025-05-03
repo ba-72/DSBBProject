@@ -9,7 +9,7 @@ import edu.princeton.cs.algs4.*;
 
 public class MainFrame extends JFrame {
     private ImageCanvas imageCanvas;
-    private boolean isSettingSeed = false;
+    boolean isSettingSeed = false;
 
     public MainFrame() {
         setTitle("Intelligent Scissors");
