@@ -7,8 +7,9 @@ public class ImageGraph {
     // 2. 计算链接成本（根据公式C(x,y) = 1/(1+G(x,y))）
     // 3. 构建8邻接图结构
 
-    int Gx=0;
-    int Gy=0;
+    int[][] Gx=new int[1024][768];//TODO:把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+    int[][] Gy=new int[1024][768];//TODO:把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+    Double[][] Gtotal=new Double[1024][768];
 
 
 
@@ -23,7 +24,7 @@ public class ImageGraph {
             for (int j=0;j<grayPicture[i].length;j++){
                 for(int k=0;k<=2;k++){
                     for (int m=0;m<=2;m++){
-                        Gx+=Sx[k][m]*grayPicture[i+k-1][j+m-1];
+                        Gx[i][j]+=Sx[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
                     }
                 }
             }
@@ -33,11 +34,18 @@ public class ImageGraph {
             for (int j=0;j<grayPicture[i].length;j++){
                 for(int k=0;k<=2;k++){
                     for (int m=0;m<=2;m++){
-                        Gy+=Sy[k][m]*grayPicture[i+k-1][j+m-1];
+                        Gy[i][j]+=Sy[k][m]*grayPicture[i+k-1][j+m-1];
                     }
                 }
             }
         }
+
+        for(int i=0;i<grayPicture.length;i++){
+            for (int j=0;j<grayPicture[i].length;j++){
+                Gtotal[i][j]=Math.sqrt(Math.pow((double) Gx[i][j],2)+Math.pow((double) Gy[i][j],2));
+            }
+        }
+
     }
 
     public double getCost(Point from, Point to) {
