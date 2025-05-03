@@ -1,8 +1,15 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import edu.princeton.cs.algs4.*;
 
 public class MainFrame extends JFrame {
     private ImageCanvas imageCanvas;
+    private boolean isSettingSeed = false;
 
     public MainFrame() {
         setTitle("Intelligent Scissors");
@@ -38,14 +45,46 @@ public class MainFrame extends JFrame {
 
         // 图像显示区域
         imageCanvas = new ImageCanvas();
+        MouseHandler mouseHandler = new MouseHandler(imageCanvas);
+        imageCanvas.addMouseListener(mouseHandler);
+        imageCanvas.addMouseMotionListener(mouseHandler);
         mainPanel.add(new JScrollPane(imageCanvas), BorderLayout.CENTER);
 
         add(mainPanel);
 
         // TODO: 需要实现事件监听器
-        // openItem.addActionListener(...);  // 实现图片上传
-        // seedButton.addActionListener(...); // 设置种子点模式
-        // computeButton.addActionListener(...); // 触发路径计算
+        openItem.addActionListener(new ActionListener() {
+                                       @Override
+                                       public void actionPerformed(ActionEvent e) {
+                                           JFileChooser fileChooser = new JFileChooser();
+                                           fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                                                   "Image Files", "jpg", "png", "bmp"));
+
+                                           int result = fileChooser.showOpenDialog(MainFrame.this);
+                                           if (result == JFileChooser.APPROVE_OPTION) {
+                                               File selectedFile = fileChooser.getSelectedFile();
+                                               try {
+                                                   BufferedImage image = ImageIO.read(selectedFile);
+                                                   imageCanvas.setImage(image);
+                                               } catch (IOException ex) {
+                                                   JOptionPane.showMessageDialog(MainFrame.this,
+                                                           "Error loading image", "Error", JOptionPane.ERROR_MESSAGE);
+                                               }
+                                           }
+                                       }
+                                   }
+        );  // 实现图片上传
+        exitItem.addActionListener(e -> System.exit(0));
+
+
+        seedButton.addActionListener(e -> {
+            isSettingSeed = true; // 进入设置种子点模式
+            JOptionPane.showMessageDialog(this, "Click on canvas to set seed point");
+        }); // 设置种子点模式
+
+        computeButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Path computation triggered");
+        }); // 触发路径计算
     }
 
     public static void main(String[] args) {
