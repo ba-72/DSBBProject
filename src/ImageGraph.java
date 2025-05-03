@@ -21,9 +21,9 @@ public class ImageGraph {
         //TODO:这里的时间复杂度是O(n^4)，必须进行优化
         for(int i=0;i<grayPicture.length;i++){
             for (int j=0;j<grayPicture[i].length;j++){
-                for(int k=-1;k<=1;k++){
-                    for (int m=-1;m<=1;m++){
-                        Gx+=Sx[k][m]*grayPicture[i+k][j+m];
+                for(int k=0;k<=2;k++){
+                    for (int m=0;m<=2;m++){
+                        Gx+=Sx[k][m]*grayPicture[i+k-1][j+m-1];
                     }
                 }
             }
@@ -31,9 +31,9 @@ public class ImageGraph {
         //TODO:这也是
         for(int i=0;i<grayPicture.length;i++){
             for (int j=0;j<grayPicture[i].length;j++){
-                for(int k=-1;k<=1;k++){
-                    for (int m=-1;m<=1;m++){
-                        Gy+=Sy[k][m]*grayPicture[i+k][j+m];
+                for(int k=0;k<=2;k++){
+                    for (int m=0;m<=2;m++){
+                        Gy+=Sy[k][m]*grayPicture[i+k-1][j+m-1];
                     }
                 }
             }
