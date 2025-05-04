@@ -7,18 +7,38 @@ public class ImageGraph {
     // 2. 计算链接成本（根据公式C(x,y) = 1/(1+G(x,y))）
     // 3. 构建8邻接图结构
 
-    int[][] grayPicture=new int[1024][768];//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+    int[][] grayPicture;//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
     //TODO:补零（Zero Padding）：外围填充0
     //将图像化为灰度图并且转为矩阵保存在grayPicture
-    int[][] Gx=new int[1024][768];//TODO:把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
-    int[][] Gy=new int[1024][768];//TODO:把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
-    Double[][] Gtotal=new Double[1024][768];
-    Double[][] Fg=new Double[1024][768];//标准化的Gtotal
+    int[][] Gx;//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+    int[][] Gy;//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+    double[][] Gtotal;
+    double[][] Fg;//标准化的Gtotal
     double Max=Double.MIN_VALUE;
-    double[][] cost=new double[1024][768];
-
+    int[][] rgb;
+    int[][] gray;
+    double[][] cost;
 
     public ImageGraph(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        grayPicture = new int[width][height];
+        for(int i=0;i<grayPicture.length;i++){
+            for (int j=0;j<grayPicture[i].length;j++){
+                int rgb = image.getRGB(i,j);
+                grayPicture[i][j] = (rgb >> 16) & 0xFF;
+            }
+        }
+        Gx = new int[width][height];
+        Gy = new int[width][height];
+        Gtotal = new double[width][height];
+        Fg = new double[width][height];
+        cost = new double[width][height];
+        computeSobelGradient(image); // 计算梯度
+    }
+
+
+    public void computeSobelGradient(BufferedImage image){
         // 计算Sobel梯度
 
         int[][] Sx={{-1,0,1},{-2,0,2},{-1,0,1}};
@@ -63,6 +83,7 @@ public class ImageGraph {
         for(int i=0;i<grayPicture.length;i++){
             for (int j=0;j<grayPicture[i].length;j++){
                 Fg[i][j]=(Max-Gtotal[i][j])/Max;
+                cost[i][j] = 1.0 / (1.0 + Gtotal[i][j]);
             }
         }
 
@@ -70,13 +91,27 @@ public class ImageGraph {
 
     public double getCost(Point from, Point to) {
         // 返回两个像素之间的链接成本
-        for(int i=0;i<grayPicture.length;i++){
-            for (int j=0;j<grayPicture[i].length;j++){
-                cost[i][j]=1/(1+Gtotal[i][j]);
-            }
+//        for(int i=0;i<grayPicture.length;i++){
+//            for (int j=0;j<grayPicture[i].length;j++){
+//                cost[i][j]=1/(1+Gtotal[i][j]);
+//            }
+//        }
+//        return cost[0][0];//TODO:没看明白这里要return什么，需要完善
+
+        // 检查是否為 8 邻接
+        int dx = Math.abs(to.x - from.x);
+        int dy = Math.abs(to.y - from.y);
+        if (dx > 1 || dy > 1) {
+            throw new IllegalArgumentException("非 8 邻接像素");
         }
-
-
-        return cost[0][0];//TODO:没看明白这里要return什么，需要完善
+        // 获取目标点的梯度强度 G
+        double G = Gtotal[to.x][to.y];
+        // 计算成本（梯度越高，成本越低）
+        double cost = 1.0 / (1.0 + G);
+        // 斜向移动额外处理（如乘以 sqrt(2)）
+        if (dx != 0 && dy != 0) {
+            cost *= Math.sqrt(2); // 可选：斜向移动成本更高
+        }
+        return cost;
     }
 }

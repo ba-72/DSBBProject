@@ -1,11 +1,24 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class ImageCanvas extends JPanel {
     private BufferedImage currentImage;
     private Point seedPoint;
     private java.util.List<Point> pathPoints;
+    private java.util.List<Point> path = new ArrayList<>();
+    private BufferedImage image;
+
+    public BufferedImage getImage() {
+        return this.image;
+    }
+
+    // 新增：设置路径并重绘
+    public void setPath(java.util.List<Point> path) {
+        this.path = path;
+        repaint();
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -20,6 +33,16 @@ public class ImageCanvas extends JPanel {
         if (seedPoint != null) {
             g.setColor(Color.RED);
             g.fillOval(seedPoint.x - 5, seedPoint.y - 5, 10, 10);
+        }
+
+        // 新增：绘制路径
+        if (!path.isEmpty()) {
+            g.setColor(Color.BLUE);
+            Point prev = path.get(0);
+            for (Point p : path) {
+                g.drawLine(prev.x, prev.y, p.x, p.y);
+                prev = p;
+            }
         }
 
         // TODO: 绘制实时路径（绿色线条）
@@ -43,5 +66,9 @@ public class ImageCanvas extends JPanel {
     public void updatePath(java.util.List<Point> path) {
         this.pathPoints = path;
         repaint();
+    }
+
+    public Point getSeedPoint() {
+        return this.seedPoint;
     }
 }

@@ -3,13 +3,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Collections;
+
 import edu.princeton.cs.algs4.*;
 
 public class MainFrame extends JFrame {
     private ImageCanvas imageCanvas;
     boolean isSettingSeed = false;
+    private Point seedPoint; // 新增：存储当前种子点
+    protected ImageGraph imageGraph; // 新增：图像梯度数据
+    protected long lastUpdateTime = 0; // 用于限流
+
+    public void setImageGraph(ImageGraph graph) {
+        this.imageGraph = graph;
+    }
 
     public MainFrame() {
         setTitle("Intelligent Scissors");
@@ -30,6 +41,7 @@ public class MainFrame extends JFrame {
         fileMenu.add(exitItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
+        imageCanvas = new ImageCanvas();
 
         // 2. 主布局
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -45,7 +57,7 @@ public class MainFrame extends JFrame {
 
         // 图像显示区域
         imageCanvas = new ImageCanvas();
-        MouseHandler mouseHandler = new MouseHandler(imageCanvas);
+        MouseHandler mouseHandler = new MouseHandler(imageCanvas,this);
         imageCanvas.addMouseListener(mouseHandler);
         imageCanvas.addMouseMotionListener(mouseHandler);
         mainPanel.add(new JScrollPane(imageCanvas), BorderLayout.CENTER);
@@ -78,6 +90,7 @@ public class MainFrame extends JFrame {
 
 
         seedButton.addActionListener(e -> {
+            System.out.println(1);
             isSettingSeed = true; // 进入设置种子点模式
             JOptionPane.showMessageDialog(this, "Click on canvas to set seed point");
         }); // 设置种子点模式
@@ -85,7 +98,39 @@ public class MainFrame extends JFrame {
         computeButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Path computation triggered");
         }); // 触发路径计算
+
+        imageCanvas.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (seedPoint != null) {
+                    // 实时计算路径（在鼠标移动时触发）
+                    java.util.List<Point> path = calculatePath(seedPoint, e.getPoint());
+                    imageCanvas.setPath(path);
+                }
+            }
+        });
     }
+
+    private java.util.List<Point> calculatePath(Point start, Point end) {
+        if (imageGraph == null) return Collections.emptyList();
+        return Dijkstra.findPath(imageGraph, start, end); // 调用算法
+    }
+
+//    private class MouseHandler extends MouseAdapter {
+//        @Override
+//        public void mouseClicked(MouseEvent e) {
+//            if (isSettingSeed) {
+//                seedPoint = e.getPoint();
+//                imageCanvas.setSeedPoint(seedPoint);
+//                isSettingSeed = false;
+//
+//                // 初始化图像梯度图（首次点击时加载）
+//                if (imageGraph == null) {
+//                    imageGraph = new ImageGraph(imageCanvas.getImage());
+//                }
+//            }
+//        }
+//    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
