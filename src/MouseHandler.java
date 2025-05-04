@@ -16,18 +16,18 @@ public class MouseHandler extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (mainFrame.isSettingSeed) {
+//        if (mainFrame.isSettingSeed) {
             // 设置种子点
             Point seed = e.getPoint();
             canvas.setSeedPoint(seed);
-            mainFrame.isSettingSeed = false;
+//            mainFrame.isSettingSeed = false;
 
             // 初始化图像梯度图（首次点击时加载）
             if (imageGraph == null) {
                 imageGraph = new ImageGraph(canvas.getImage());
             }
             mainFrame.setImageGraph(imageGraph); // 将graph传递给MainFrame
-        }
+//        }
     }
 
     @Override

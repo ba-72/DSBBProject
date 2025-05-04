@@ -49,9 +49,9 @@ public class MainFrame extends JFrame {
         // 左侧控制面板
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
-        JButton seedButton = new JButton("Set Seed Point");
+//        JButton seedButton = new JButton("Set Seed Point");
         JButton computeButton = new JButton("Compute Path");
-        controlPanel.add(seedButton);
+//        controlPanel.add(seedButton);
         controlPanel.add(computeButton);
         mainPanel.add(controlPanel, BorderLayout.WEST);
 
@@ -89,11 +89,11 @@ public class MainFrame extends JFrame {
         exitItem.addActionListener(e -> System.exit(0));
 
 
-        seedButton.addActionListener(e -> {
-            System.out.println(1);
-            isSettingSeed = true; // 进入设置种子点模式
-            JOptionPane.showMessageDialog(this, "Click on canvas to set seed point");
-        }); // 设置种子点模式
+//        seedButton.addActionListener(e -> {
+//            System.out.println(1);
+//            isSettingSeed = true; // 进入设置种子点模式
+//            JOptionPane.showMessageDialog(this, "Click on canvas to set seed point");
+//        }); // 设置种子点模式
 
         computeButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(this, "Path computation triggered");
