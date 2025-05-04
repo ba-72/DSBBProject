@@ -2,7 +2,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 public class MouseHandler extends MouseAdapter {
     private final ImageCanvas canvas;
@@ -17,16 +17,19 @@ public class MouseHandler extends MouseAdapter {
     @Override
     public void mouseClicked(MouseEvent e) {
 //        if (mainFrame.isSettingSeed) {
-            // 设置种子点
-            Point seed = e.getPoint();
-            canvas.setSeedPoint(seed);
+        // 设置种子点
+        Point seed = e.getPoint();
+        canvas.setSeedPoint(seed);
 //            mainFrame.isSettingSeed = false;
-
-            // 初始化图像梯度图（首次点击时加载）
-            if (imageGraph == null) {
-                imageGraph = new ImageGraph(canvas.getImage());
-            }
-            mainFrame.setImageGraph(imageGraph); // 将graph传递给MainFrame
+        if (canvas.getImage() == null) {
+            JOptionPane.showMessageDialog(canvas, "请先打开图像！", "错误", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        // 初始化图像梯度图（首次点击时加载）
+        if (imageGraph == null) {
+            imageGraph = new ImageGraph(canvas.getImage());
+        }
+        mainFrame.setImageGraph(imageGraph); // 将graph传递给MainFrame
 //        }
     }
 

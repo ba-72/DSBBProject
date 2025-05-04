@@ -11,7 +11,8 @@ public class ImageCanvas extends JPanel {
     private BufferedImage image;
 
     public BufferedImage getImage() {
-        return this.image;
+//        return this.image;
+        return this.currentImage;
     }
 
     // 新增：设置路径并重绘
@@ -27,6 +28,7 @@ public class ImageCanvas extends JPanel {
         // 绘制图像
         if (currentImage != null) {
             g.drawImage(currentImage, 0, 0, this);
+            System.out.println(2);
         }
 
         // 绘制种子点（红色圆圈）

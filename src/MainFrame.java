@@ -137,4 +137,23 @@ public class MainFrame extends JFrame {
             new MainFrame().setVisible(true);
         });
     }
+
+    // MainFrame.java 中的打开图像方法
+    private void openImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fileChooser.getSelectedFile();
+                BufferedImage image = ImageIO.read(file);
+                System.out.println(3);
+                imageCanvas.setImage(image); // 确保此处正确设置图像
+                System.out.println(4);
+                imageCanvas.repaint();
+                System.out.println(5);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "加载图像失败", "错误", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }
