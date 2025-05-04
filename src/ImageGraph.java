@@ -48,7 +48,11 @@ public class ImageGraph {
             for (int j=0;j<grayPicture[i].length;j++){
                 for(int k=0;k<=2;k++){
                     for (int m=0;m<=2;m++){
-                        Gx[i][j]+=Sx[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
+                        if(i+k-1<0 || i+k-1>=grayPicture.length || j+m-1<0 || j+m-1>=grayPicture[0].length){
+                            Gx[i][j]+=0;
+                        }else {
+                            Gx[i][j]+=Sx[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
+                        }
                     }
                 }
             }
@@ -58,7 +62,12 @@ public class ImageGraph {
             for (int j=0;j<grayPicture[i].length;j++){
                 for(int k=0;k<=2;k++){
                     for (int m=0;m<=2;m++){
-                        Gy[i][j]+=Sy[k][m]*grayPicture[i+k-1][j+m-1];
+//                        Gy[i][j]+=Sy[k][m]*grayPicture[i+k-1][j+m-1];
+                        if(i+k-1<0 || i+k-1>=grayPicture.length || j+m-1<0 || j+m-1>=grayPicture[0].length){
+                            Gy[i][j]+=0;
+                        }else {
+                            Gy[i][j]+=Sx[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
+                        }
                     }
                 }
             }
