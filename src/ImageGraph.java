@@ -66,7 +66,7 @@ public class ImageGraph {
                         if(i+k-1<0 || i+k-1>=grayPicture.length || j+m-1<0 || j+m-1>=grayPicture[0].length){
                             Gy[i][j]+=0;
                         }else {
-                            Gy[i][j]+=Sx[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
+                            Gy[i][j]+=Sy[k][m]*grayPicture[i+k-1][j+m-1];//TODO:防止数组越界
                         }
                     }
                 }
