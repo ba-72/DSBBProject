@@ -36,8 +36,10 @@ public class MainFrame extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         JMenuItem openItem = new JMenuItem("Open Image");
+        JMenuItem saveItem = new JMenuItem("Save Result");
         JMenuItem exitItem = new JMenuItem("Exit");
         fileMenu.add(openItem);
+        fileMenu.add(saveItem);
         fileMenu.add(exitItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
@@ -86,6 +88,11 @@ public class MainFrame extends JFrame {
                                        }
                                    }
         );  // 实现图片上传
+
+        saveItem.addActionListener(e -> {
+            saveImage();
+        });
+
         exitItem.addActionListener(e -> System.exit(0));
 
 
@@ -156,4 +163,32 @@ public class MainFrame extends JFrame {
             }
         }
     }
+
+    private void saveImage() {
+        if (imageCanvas.getImage() == null) {
+            JOptionPane.showMessageDialog(this, "No image loaded", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "PNG Images", "png"));
+
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (!file.getName().toLowerCase().endsWith(".png")) {
+                file = new File(file.getAbsolutePath() + ".png");
+            }
+
+            try {
+                BufferedImage processedImage = imageCanvas.createMaskedImage();
+                ImageIO.write(processedImage, "png", file);
+                JOptionPane.showMessageDialog(this, "Image saved successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error saving image", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
 }
