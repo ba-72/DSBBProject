@@ -1,10 +1,7 @@
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 import javax.swing.*;
 
 public class MouseHandler extends MouseAdapter {
@@ -14,6 +11,8 @@ public class MouseHandler extends MouseAdapter {
     private Deque<List<Point>> pathHistory = new ArrayDeque<>(3);
     private List<List<Point>> historicalPaths = new ArrayList<>(); // 历史路径集合
     private Point firstSeed; // 初始种子点
+    private double[][] gradient;
+    private PathCoolingMonitor coolingMonitor = new PathCoolingMonitor();
 
     public MouseHandler(ImageCanvas canvas, MainFrame mainFrame) {
         this.canvas = canvas;
@@ -33,7 +32,18 @@ public class MouseHandler extends MouseAdapter {
             if (!canvas.currentPath.isEmpty()) {
                 canvas.commitCurrentPath(); // 提交当前路径到历史
             }
-            canvas.setSeedPoint(clickedPoint); // 关键修改：新种子点为点击位置
+            if(gradient==null){
+                gradient=imageGraph.getGtotal();
+            }
+
+//            if (imageGraph == null) return Collections.emptyList();
+
+//        System.out.println(0);
+
+            Point snappedPoint = CursorSnapper.snapToEdge(e.getPoint(), gradient);
+            // 计算路径并更新显示
+//            java.util.List<Point> path = calculatePath(seedPoint, snappedPoint);
+            canvas.setSeedPoint(snappedPoint); // 关键修改：新种子点为点击位置
         }
 
         // 初始化或刷新梯度图
@@ -46,15 +56,67 @@ public class MouseHandler extends MouseAdapter {
     private static final int SNAP_RADIUS = 5;
 
     @Override
+//    public void mouseMoved(MouseEvent e) {
+//        if (imageGraph != null && canvas.getSeedPoint() != null) {
+//            if(gradient==null){
+//                gradient=imageGraph.getGtotal();
+//            }
+//            // 原始鼠标位置
+//            Point rawPoint = e.getPoint();
+//            // 执行光标吸附
+//            Point snappedPoint = snapToEdge(rawPoint);
+//            // 限制计算频率
+//            if (System.currentTimeMillis() - mainFrame.lastUpdateTime > 50 && MainFrame.Close==false) {
+//                calculateAndDrawPath(snappedPoint); // 使用吸附后的坐标
+//                mainFrame.lastUpdateTime = System.currentTimeMillis();
+//            }
+//
+//
+//        }
+//    }
+
     public void mouseMoved(MouseEvent e) {
         if (imageGraph != null && canvas.getSeedPoint() != null) {
-            // 原始鼠标位置
+            if (gradient == null) {
+                gradient = imageGraph.getGtotal(); // 确保梯度数据加载
+            }
+
+            // 光标吸附
             Point rawPoint = e.getPoint();
-            // 执行光标吸附
             Point snappedPoint = snapToEdge(rawPoint);
-            // 限制计算频率
-            if (System.currentTimeMillis() - mainFrame.lastUpdateTime > 50 && MainFrame.Close==false) {
-                calculateAndDrawPath(snappedPoint); // 使用吸附后的坐标
+
+            // 限流：50ms内只计算一次
+            if (System.currentTimeMillis() - mainFrame.lastUpdateTime > 50 && !MainFrame.Close) {
+                // 异步计算路径并处理冷却
+                new Thread(() -> {
+                    // 计算路径
+                    List<Point> path = Dijkstra.findPath(imageGraph, canvas.getSeedPoint(), snappedPoint);
+
+                    // 空路径防御
+                    if (path == null || path.isEmpty()) return;
+
+                    // 路径冷却检测
+                    if (coolingMonitor.isPathStable(path)) {
+                        SwingUtilities.invokeLater(() -> {
+                            if (!canvas.currentPath.isEmpty()) {
+                                canvas.commitCurrentPath(); // 提交当前路径到历史
+                            }
+                            Point newSeed = path.get(path.size() - 1);
+                            canvas.setSeedPoint(newSeed); // 更新种子点
+                            coolingMonitor.updatePath(Collections.emptyList());
+                        });
+                    } else {
+                        coolingMonitor.updatePath(path);
+                    }
+
+                    // 更新UI
+                    SwingUtilities.invokeLater(() -> {
+                        canvas.setPath(path);
+                        canvas.repaint();
+                    });
+                }).start();
+
+                calculateAndDrawPath(snappedPoint);
                 mainFrame.lastUpdateTime = System.currentTimeMillis();
             }
         }
@@ -145,4 +207,24 @@ public class MouseHandler extends MouseAdapter {
         Point lastPoint = path.get(path.size() - 1);
         return lastPoint.distance(firstSeed) < 5.0;
     }   // 阈值5像素
+
+    private java.util.List<Point> calculatePath(Point start, Point end) {
+        if (imageGraph == null) return Collections.emptyList();
+
+//        System.out.println(0);
+        java.util.List<Point> path = Dijkstra.findPath(imageGraph, start, end);
+
+        // 路径冷却：当路径稳定时自动生成新种子点
+        if (coolingMonitor.isPathStable(path)) {
+//            System.out.println(1);
+            Point newSeed = path.get(path.size() - 1);
+//            seedPoint = newSeed;
+            canvas.setSeedPoint(newSeed);
+            coolingMonitor.updatePath(Collections.emptyList()); // 重置状态
+        } else {
+            coolingMonitor.updatePath(path);
+        }
+
+        return path;
+    }
 }

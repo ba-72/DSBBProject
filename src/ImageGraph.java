@@ -12,12 +12,22 @@ public class ImageGraph {
     //将图像化为灰度图并且转为矩阵保存在grayPicture
     int[][] Gx;//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
     int[][] Gy;//把int[][]的大小改为与导入图片外面加一圈防止数组溢出的数列之后的大小一致
+
+    public double[][] getGtotal() {
+        return Gtotal;
+    }
+
+    public void setGtotal(double[][] gtotal) {
+        Gtotal = gtotal;
+    }
+
     double[][] Gtotal;
     double[][] Fg;//标准化的Gtotal
     double Max=Double.MIN_VALUE;
     int[][] rgb;
     int[][] gray;
     double[][] cost;
+    double[][] gradient;
 
     public ImageGraph(BufferedImage image) {
         int width = image.getWidth();
@@ -52,8 +62,14 @@ public class ImageGraph {
 //        cost = new double[width+2][height+2];
 
         computeSobelGradient(image); // 计算梯度
+
     }
 
+
+
+    public double[][] getGradient() {
+        return gradient;
+    }
 
     public void computeSobelGradient(BufferedImage image){
         // 计算Sobel梯度

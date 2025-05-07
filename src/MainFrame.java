@@ -18,6 +18,9 @@ public class MainFrame extends JFrame {
     private Point seedPoint; // 新增：存储当前种子点
     protected ImageGraph imageGraph; // 新增：图像梯度数据
     protected long lastUpdateTime = 0; // 用于限流
+    private double[][] gradient;
+    private PathCoolingMonitor coolingMonitor = new PathCoolingMonitor();//添加冷却监控器
+
 
     public void setImageGraph(ImageGraph graph) {
         this.imageGraph = graph;
@@ -30,6 +33,21 @@ public class MainFrame extends JFrame {
 
         // 初始化组件
         initComponents();
+//        imageCanvas.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent e) {
+//                if (isSettingSeed) {
+//                    seedPoint = e.getPoint();
+//                    imageCanvas.setSeedPoint(seedPoint);
+//                    isSettingSeed = false;
+//
+//                    if (imageGraph == null) {
+//                        imageGraph = new ImageGraph(imageCanvas.getImage());
+//                        gradient = imageGraph.getGradient(); // 加载梯度数据
+//                    }
+//                }
+//            }
+//        });
     }
 
     private void initComponents() {
@@ -108,22 +126,68 @@ public class MainFrame extends JFrame {
 //            JOptionPane.showMessageDialog(this, "Path computation triggered");
 //        }); // 触发路径计算
 
+//        imageCanvas.addMouseMotionListener(new MouseAdapter() {
+//            @Override
+//            public void mouseMoved(MouseEvent e) {
+//                if (seedPoint != null) {
+//                    // 实时计算路径（在鼠标移动时触发）
+//                    java.util.List<Point> path = calculatePath(seedPoint, e.getPoint());
+//                    imageCanvas.setPath(path);
+//                }
+//            }
+//        });
+
+//        System.out.println(1);
+
         imageCanvas.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (seedPoint != null) {
+
+//                System.out.println(2);
+                if (seedPoint != null/* && imageGraph != null*/) {
+//                    System.out.println(3);
+                    if(gradient==null){
+                        gradient=imageGraph.getGtotal();
+                    }
+
                     // 实时计算路径（在鼠标移动时触发）
-                    java.util.List<Point> path = calculatePath(seedPoint, e.getPoint());
+                    Point snappedPoint = CursorSnapper.snapToEdge(e.getPoint(), gradient);
+                    // 计算路径并更新显示
+                    java.util.List<Point> path = calculatePath(seedPoint, snappedPoint);
                     imageCanvas.setPath(path);
                 }
+//                if(seedPoint==null){
+//                    System.out.println(3);
+//                }
             }
         });
     }
 
+//    private java.util.List<Point> calculatePath(Point start, Point end) {
+//        if (imageGraph == null) return Collections.emptyList();
+//        return Dijkstra.findPath(imageGraph, start, end); // 调用算法
+//    }
+
     private java.util.List<Point> calculatePath(Point start, Point end) {
         if (imageGraph == null) return Collections.emptyList();
-        return Dijkstra.findPath(imageGraph, start, end); // 调用算法
+
+//        System.out.println(0);
+        java.util.List<Point> path = Dijkstra.findPath(imageGraph, start, end);
+
+        // 路径冷却：当路径稳定时自动生成新种子点
+        if (coolingMonitor.isPathStable(path)) {
+//            System.out.println(1);
+            Point newSeed = path.get(path.size() - 1);
+            seedPoint = newSeed;
+            imageCanvas.setSeedPoint(newSeed);
+            coolingMonitor.updatePath(Collections.emptyList()); // 重置状态
+        } else {
+            coolingMonitor.updatePath(path);
+        }
+
+        return path;
     }
+
 
 //    private class MouseHandler extends MouseAdapter {
 //        @Override
