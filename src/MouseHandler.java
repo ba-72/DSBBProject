@@ -53,7 +53,7 @@ public class MouseHandler extends MouseAdapter {
             // 执行光标吸附
             Point snappedPoint = snapToEdge(rawPoint);
             // 限制计算频率
-            if (System.currentTimeMillis() - mainFrame.lastUpdateTime > 50) {
+            if (System.currentTimeMillis() - mainFrame.lastUpdateTime > 50 && MainFrame.Close==false) {
                 calculateAndDrawPath(snappedPoint); // 使用吸附后的坐标
                 mainFrame.lastUpdateTime = System.currentTimeMillis();
             }
@@ -129,6 +129,7 @@ public class MouseHandler extends MouseAdapter {
                 historicalPaths.add(path); // 保存闭合路径
                 canvas.commitCurrentPath();
                 JOptionPane.showMessageDialog(canvas, "路径已闭合！");
+                MainFrame.Close=true;
             } else {
                 // 更新当前路径
                 SwingUtilities.invokeLater(() -> {

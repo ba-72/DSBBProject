@@ -114,7 +114,7 @@ public class ImageGraph {
             throw new IllegalArgumentException("非 8 邻接像素");
         }
         // 获取目标点的梯度强度 G
-        double G = Gtotal[to.x][to.y];
+        double G = Gtotal[to.x][to.y];//TODO:这行会报错越界
         // 计算成本（梯度越高，成本越低）
         double cost = 1.0 / (1.0 + G);
         // 斜向移动额外处理（如乘以 sqrt(2)）
