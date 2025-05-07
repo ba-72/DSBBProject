@@ -137,7 +137,7 @@ public class ImageGraph {
         // 获取目标点的梯度强度 G
 //        System.out.println(to.x);
 //        System.out.println(to.y);
-        double G = Gtotal[to.x][to.y];//TODO:这行会报错越界
+        double G = Gtotal[to.x][to.y];
         // 计算成本（梯度越高，成本越低）
         double cost = 1.0 / (1.0 + G);
         // 斜向移动额外处理（如乘以 sqrt(2)）
