@@ -29,11 +29,28 @@ public class ImageGraph {
                 grayPicture[i][j] = (rgb >> 16) & 0xFF;
             }
         }
+
+//        grayPicture = new int[width + 2][height + 2]; // 外围默认填充0
+//        for (int i = 0; i < width; i++) {
+//            for (int j = 0; j < height; j++) {
+//                int rgb = image.getRGB(i, j);
+//                grayPicture[i + 1][j + 1] = (rgb >> 16) & 0xFF; // 原图放在中心，外围是0
+//            }
+//        }
+
         Gx = new int[width][height];
         Gy = new int[width][height];
+//        Gx = new int[width + 2][height + 2];
+//        Gy = new int[width + 2][height + 2];
+
         Gtotal = new double[width][height];
         Fg = new double[width][height];
         cost = new double[width][height];
+
+//        Gtotal = new double[width+2][height+2];
+//        Fg = new double[width+2][height+2];
+//        cost = new double[width+2][height+2];
+
         computeSobelGradient(image); // 计算梯度
     }
 
@@ -107,6 +124,10 @@ public class ImageGraph {
 //        }
 //        return cost[0][0];//TODO:没看明白这里要return什么，需要完善
 
+        if (to.x < 0 || to.x >= grayPicture.length || to.y < 0 || to.y >= grayPicture[0].length) {
+            return Double.POSITIVE_INFINITY; // 返回无限大成本表示无效连接
+        }
+
         // 检查是否為 8 邻接
         int dx = Math.abs(to.x - from.x);
         int dy = Math.abs(to.y - from.y);
@@ -114,6 +135,8 @@ public class ImageGraph {
             throw new IllegalArgumentException("非 8 邻接像素");
         }
         // 获取目标点的梯度强度 G
+//        System.out.println(to.x);
+//        System.out.println(to.y);
         double G = Gtotal[to.x][to.y];//TODO:这行会报错越界
         // 计算成本（梯度越高，成本越低）
         double cost = 1.0 / (1.0 + G);
